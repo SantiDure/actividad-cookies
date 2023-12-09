@@ -8,3 +8,6 @@ webRouter.get("/", (req, res) => {
 webRouter.get("/realtimeproducts", (req, res) => {
   res.render("realTimeProducts.handlebars", { title: "REAL" });
 });
+webRouter.get("/chat", (req, res) => {
+  res.render("chat.handlebars", { title: "CHAT" });
+});
