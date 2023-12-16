@@ -8,7 +8,7 @@ import {
 import { Router } from "express";
 export const productRouter = Router();
 productRouter.get("/", getProductController);
-productRouter.get("/:id", getProductControllerId);
+productRouter.get("/:pid", getProductControllerId);
 productRouter.post("/", postProductController);
-productRouter.put("/:id", putProductController);
-productRouter.delete("/:id", deleteProductController);
+productRouter.put("/:pid", putProductController);
+productRouter.delete("/:pid", deleteProductController);

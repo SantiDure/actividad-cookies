@@ -1,16 +1,28 @@
 import { productsManager } from "../dao/mongodb/mongodb.js";
 
 export async function getProductController(req, res) {
-  let limit = Number(req.query.limit);
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+    sort: { price: req.query.sort === "asc" ? 1 : -1 },
+    query: req.query.query || {},
+  };
   try {
-    const data = await productsManager.find();
-    if (!limit) {
-      return res.json(data);
-    }
-    let limitedProducts = data.slice(0, limit);
-    return res.json(limitedProducts);
+    const data = await productsManager.paginate(options.query, {
+      page: options.page,
+      limit: options.limit,
+      sort: options.sort,
+    });
+    const response = {
+      status: res.status,
+      payload: data.docs,
+      currentPage: data.page,
+      totalPages: data.totalPages,
+      totalItems: data.totalDocs,
+    };
+    res.status(200).send(response);
   } catch (error) {
-    res.send(404).send({ message: error.message });
+    res.status(404).send({ message: error.message });
   }
 }
 

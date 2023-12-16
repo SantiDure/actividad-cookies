@@ -13,7 +13,7 @@ const cartSchema = new Schema(
       addProductToCart: async function (cid, pid) {
         const initialQuantity = 1;
 
-        const cart = await cartsManager.findById(cid);
+        const cart = await model("carts", cartSchema).findById(cid);
         const product = await productsManager.findById(pid).lean();
 
         const productIndexFind = cart.products.findIndex(
@@ -21,7 +21,7 @@ const cartSchema = new Schema(
         );
 
         if (productIndexFind === -1) {
-          await cartsManager.findOneAndUpdate(
+          await model("carts", cartSchema).findOneAndUpdate(
             { _id: cid },
             {
               $addToSet: {
@@ -30,7 +30,7 @@ const cartSchema = new Schema(
             }
           );
         } else {
-          await cartsManager.findOneAndUpdate(
+          await model("carts", cartSchema).findOneAndUpdate(
             { _id: cid, "products._id": product._id },
             {
               $inc: {
@@ -40,6 +40,28 @@ const cartSchema = new Schema(
           );
         }
       },
+      deleteProductOnCart: async function (cid, pid) {
+        try {
+          const cart = await model("carts", cartSchema).findById(cid);
+          const product = await productsManager.findById(pid).lean();
+
+          const productIndexFind = cart.products.findIndex(
+            (p) => p._id === product._id
+          );
+          if (productIndexFind !== -1) {
+            cart.products.splice(productIndexFind, 1);
+
+            await cart.save();
+
+            return cart;
+          } else {
+            throw new Error("Producto no encontrado en el carrito");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      updateProductQuantityOnCart: async function (cid, pid) {},
     },
   }
 );
