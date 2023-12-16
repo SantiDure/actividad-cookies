@@ -4,7 +4,12 @@ import { productsManager } from "../mongodb.js";
 const cartSchema = new Schema(
   {
     _id: { type: String, default: randomUUID },
-    products: { type: [Object], default: [] },
+    products: [
+      {
+        _id: { type: String, ref: "products" },
+        quantity: { type: Number, default: 0 },
+      },
+    ],
   },
   {
     strict: "throw",
@@ -65,5 +70,10 @@ const cartSchema = new Schema(
     },
   }
 );
+
+cartSchema.pre("find", function (next) {
+  this.populate("products._id");
+  next();
+});
 
 export const cartsManager = model("carts", cartSchema);

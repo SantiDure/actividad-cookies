@@ -17,7 +17,10 @@ export async function getCartsController(req, res) {
 export async function getCartByIdController(req, res) {
   const { cid } = req.params;
   try {
-    const cartForId = await cartsManager.findById(cid);
+    const cartForId = await cartsManager
+      .findById({ _id: cid })
+      .populate("products._id")
+      .lean();
     return res.json({ cartForId });
   } catch (error) {
     res.status(404).send({ message: error.message });

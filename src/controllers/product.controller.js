@@ -5,14 +5,18 @@ export async function getProductController(req, res) {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
     sort: { price: req.query.sort === "asc" ? 1 : -1 },
-    query: req.query.query || {},
   };
+
+  const query = {};
+  if (req.query.category) {
+    query.category = req.query.category;
+  }
+  if (req.query.status !== undefined) {
+    query.status = req.query.status === "true";
+  }
   try {
-    const data = await productsManager.paginate(options.query, {
-      page: options.page,
-      limit: options.limit,
-      sort: options.sort,
-    });
+    const data = await productsManager.paginate(query, options);
+
     const response = {
       status: res.status,
       payload: data.docs,
@@ -20,6 +24,7 @@ export async function getProductController(req, res) {
       totalPages: data.totalPages,
       totalItems: data.totalDocs,
     };
+
     res.status(200).send(response);
   } catch (error) {
     res.status(404).send({ message: error.message });
