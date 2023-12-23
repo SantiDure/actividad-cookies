@@ -1,19 +1,40 @@
 import { Router } from "express";
 import { productsManager } from "../dao/mongodb/mongodb.js";
 import { cartsManager } from "../dao/mongodb/mongodb.js";
+import { onlySessionActive } from "../middlewares/auth.js";
 
 export const webRouter = Router();
 
 webRouter.get("/", (req, res) => {
+  res.redirect("/products");
+});
+
+webRouter.get("/signup", (req, res) => {
+  res.render("signup.handlebars", { title: "CREATE ACCOUNT" });
+});
+webRouter.get("/login", (req, res) => {
+  res.render("login.handlebars", { title: "LOGIN" });
+});
+webRouter.get("/profile", onlySessionActive, (req, res) => {
+  res.render("profile.handlebars", {
+    title: "PROFILE INFORMATION",
+    ...req.session["user"],
+  });
+});
+webRouter.get("/unauthorized", (req, res) => {
+  res.render("unauthorized.handlebars", { title: "unauthorized" });
+});
+
+webRouter.get("/index", onlySessionActive, (req, res) => {
   res.render("index.handlebars", { title: "PRUEBA" });
 });
-webRouter.get("/realtimeproducts", (req, res) => {
+webRouter.get("/realtimeproducts", onlySessionActive, (req, res) => {
   res.render("realTimeProducts.handlebars", { title: "REAL" });
 });
-webRouter.get("/chat", (req, res) => {
+webRouter.get("/chat", onlySessionActive, (req, res) => {
   res.render("chat.handlebars", { title: "CHAT" });
 });
-webRouter.get("/products", async (req, res, next) => {
+webRouter.get("/products", onlySessionActive, async (req, res, next) => {
   const criterioDeBusqueda = {};
   const opcionesDePaginacion = {
     limit: req.query.limit || 5,
@@ -30,8 +51,8 @@ webRouter.get("/products", async (req, res, next) => {
 
   res.render("products.handlebars", {
     title: "products",
+    ...req.session["user"],
     hayDocs: result.docs.length > 0,
-
     docs: result.docs,
     limit: result.limit,
     page: result.page,
@@ -43,7 +64,7 @@ webRouter.get("/products", async (req, res, next) => {
     pagingCounter: result.pagingCounter,
   });
 });
-webRouter.get("/carts/:cid", async (req, res, next) => {
+webRouter.get("/carts/:cid", onlySessionActive, async (req, res, next) => {
   const { cid } = req.params;
   const result = await cartsManager.findById({ _id: cid }).lean();
   let productList = result.products;

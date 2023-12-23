@@ -5,7 +5,10 @@ import { webRouter } from "./routers/web.router.js";
 import { Server } from "socket.io";
 import { productsManager } from "./dao/mongodb/mongodb.js";
 import { messagesManager } from "./dao/mongodb/models/Message.js";
+import { sesiones } from "./middlewares/sesiones.js";
+
 const app = express();
+app.use(sesiones);
 app.engine("handlebars", handlebars.engine());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,6 +20,7 @@ app.use((err, req, res, next) => {
 app.use("/api", apiRouter);
 
 const PORT = 8080;
+
 const server = app.listen(PORT, () =>
   console.log(`servidor levantado en el puerto ${PORT}`)
 );
